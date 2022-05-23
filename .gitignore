@@ -33,3 +33,9 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# random folders and files
+uploads/
+.env
+TODO.md
+*/migrations/
