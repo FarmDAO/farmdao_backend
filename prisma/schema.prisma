@@ -11,13 +11,14 @@ datasource db {
 }
 
 model User {
-  id            Int    @id @default(autoincrement())
-  borrower_name String @unique
-  walletAddress String @unique
+  id            Int     @id @default(autoincrement())
+  borrower_name String  @unique
+  email         String  @unique @default("None")
+  walletAddress String  @unique
   nationality   String
-  projectId     Int?   @unique
+  projectId     String? @unique
   hash          String
-  projectUrl    String @unique
+  projectUrl    String? @unique
 
   @@map("users")
 }

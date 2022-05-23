@@ -3,7 +3,6 @@ import {
   IsEmail,
   IsEthereumAddress,
   IsNotEmpty,
-  IsObject,
   IsString,
 } from 'class-validator';
 
@@ -11,6 +10,10 @@ export class AuthDTO {
   @IsNotEmpty()
   @IsString()
   borrower_name: string;
+
+  @IsEmail()
+  @IsString()
+  email: string;
 
   @IsNotEmpty()
   @IsString()
@@ -20,10 +23,6 @@ export class AuthDTO {
   @IsNotEmpty()
   @IsString()
   nationality: string;
-
-  @IsNotEmpty()
-  @IsObject()
-  data: any;
 }
 
 export class UserDTO {
