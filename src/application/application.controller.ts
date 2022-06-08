@@ -12,6 +12,7 @@ import { ValidationPipe } from '../validator/validation.pipe';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { storage } from 'src/common/filters/file.filter';
+import { fileFilter, editFileName } from '../common/filters/file.filter';
 
 @Controller('api')
 export class ApplicationController {
@@ -27,12 +28,14 @@ export class ApplicationController {
     FilesInterceptor('file', 10, {
       storage: diskStorage({
         destination: storage,
+        filename: editFileName,
       }),
+      fileFilter: fileFilter,
     }),
   )
   async uploadFile(
     @UploadedFiles() files: Express.Multer.File[],
-    @Query() dto: UserDTO,
+    @Query(new ValidationPipe()) dto: UserDTO,
   ) {
     return this.appService.uploadFiles(files, dto);
   }
