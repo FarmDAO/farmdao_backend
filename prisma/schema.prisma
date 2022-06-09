@@ -11,30 +11,30 @@ datasource db {
 }
 
 model User {
-  id            Int     @id @default(autoincrement())
-  borrower_name String  @unique
-  email         String  @unique @default("None")
-  kyc_status    Boolean
-  walletAddress String  @unique
-  nationality   String
-  projectId     String? @unique
-  hash          String
-  projectUrl    String? @unique
-  Loans         Loans[]
+  id                     Int     @id @default(autoincrement())
+  borrower_name          String  @unique
+  email                  String  @unique @default("None")
+  kyc_status             Boolean @default(false)
+  borrower_walletAddress String  @unique
+  nationality            String
+  hash                   String
+  projectUrl             String? @unique
+  Loans                  Loans[]
 
   @@map("users")
 }
 
 model Loans {
-  id                 Int      @id @default(autoincrement())
-  loanId             Int
-  loan_name          String   @unique
-  borrower           User     @relation(references: [borrower_name], fields: [borrower_name])
-  borrower_name      String
-  loan_amount        Int
-  loan_status        String   @default("None")
-  tenor              Int
-  collateral_offered String
-  grace_period       Int
-  createdAt          DateTime @default(now())
+  id                     Int      @id @default(autoincrement())
+  loanId                 String
+  loan_name              String   @unique
+  loan_pool_address      String?  @unique
+  borrower               User     @relation(references: [borrower_walletAddress], fields: [borrower_walletAddress])
+  borrower_walletAddress String   @default("0x00000000000000000000000")
+  loan_amount            Int
+  loan_status            String   @default("None")
+  tenor                  Int
+  collateral_offered     String
+  grace_period           Int
+  createdAt              DateTime @default(now())
 }
