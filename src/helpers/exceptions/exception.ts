@@ -34,3 +34,12 @@ export class LoanExistsException extends HttpException {
     );
   }
 }
+
+export class FileExistsException extends HttpException {
+  constructor(file_name: string) {
+    super(
+      `A file with name "${file_name}" already exists, rename the file and try again`,
+      HttpStatus.FOUND,
+    );
+  }
+}
