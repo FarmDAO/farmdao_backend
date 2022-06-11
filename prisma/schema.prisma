@@ -19,7 +19,9 @@ model User {
   nationality            String
   hash                   String
   projectUrl             String? @unique
+  cid                    String? @unique
   Loans                  Loans[]
+  Files                  Files[]
 
   @@map("users")
 }
@@ -37,4 +39,10 @@ model Loans {
   collateral_offered     String
   grace_period           Int
   createdAt              DateTime @default(now())
+}
+
+model Files {
+  file_name              String @unique
+  borrower               User   @relation(references: [borrower_walletAddress], fields: [borrower_walletAddress])
+  borrower_walletAddress String
 }
