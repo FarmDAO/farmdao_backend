@@ -4,10 +4,9 @@ import {
   IsEthereumAddress,
   IsIn,
   IsInt,
-  isNotEmpty,
   IsNotEmpty,
   IsString,
-  MinLength,
+  IsUrl,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -143,6 +142,26 @@ export class UploadCidDTO {
   @IsString()
   @IsNotEmpty()
   cid: string;
+
+  @ApiProperty({
+    example: '0x00000000000000000',
+    description: 'Borrower wallet address',
+  })
+  @IsNotEmpty()
+  @IsString()
+  @IsEthereumAddress()
+  walletAddress: string;
+}
+
+export class UploadUrlDTO {
+  @ApiProperty({
+    example: 'https://url.com',
+    description: 'URL to google doc folder holding documents',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsUrl()
+  project_url: string;
 
   @ApiProperty({
     example: '0x00000000000000000',

@@ -8,17 +8,16 @@ import {
   LoanUpdateDTO,
   UploadCidDTO,
 } from 'src/dto';
-import { Injectable, StreamableFile } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Loans, User } from '.prisma/client';
-import { createReadStream } from 'fs';
+import { UploadUrlDTO } from '../dto/index';
 import {
   ProjectNotFoundException,
   CreationException,
   UserExistsException,
   LoanExistsException,
-  FileExistsException,
 } from '../helpers/exceptions/exception';
 import {
   CreationResponse,
@@ -57,6 +56,24 @@ export class ApplicationService {
     return new FoundResponse(result);
   }
 
+  async getAllLoans(): Promise<object> {
+    const allLoans = await this.prisma.user.findMany({
+      include: { Loans: true },
+    });
+
+    return new FoundResponse(allLoans);
+  }
+
+  async getProjectUrl(walletAddr: UserDTO): Promise<any> {
+    const userProjectUrl = await this.prisma.user.findUnique({
+      where: {
+        borrower_walletAddress: walletAddr.walletAddress,
+      },
+    });
+
+    return new FoundResponse(userProjectUrl.projectUrl);
+  }
+
   /**
    * @param updateCidDto: wallet address and project cid
    * @yields: save cid and set status to false on database
@@ -77,6 +94,19 @@ export class ApplicationService {
     return new UpdateResponse({
       Success: `CID '${cid}' saved for ${dto.walletAddress}`,
     });
+  }
+
+  async uploadProjectUrl(dto: UploadUrlDTO): Promise<object> {
+    await this.prisma.user.update({
+      where: {
+        borrower_walletAddress: dto.walletAddress,
+      },
+      data: {
+        projectUrl: dto.project_url,
+      },
+    });
+
+    return new CreationResponse(`Project url updated for ${dto.walletAddress}`);
   }
 
   async retrieveUserFiles(dto: UserDTO) {

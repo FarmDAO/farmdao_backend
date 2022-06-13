@@ -1,30 +1,19 @@
-import * as fs from 'fs';
+import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  Get,
-  Patch,
-  Post,
-  Query,
-  Response,
-  StreamableFile,
-  UploadedFiles,
-  UseInterceptors,
-} from '@nestjs/common';
-import {
+  ApiExcludeEndpoint,
   ApiOperation,
   ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { join } from 'path';
 import {
   AuthDTO,
   UserDTO,
   LoanRequestDTO,
   LoanUpdateDTO,
   UploadCidDTO,
+  UploadUrlDTO,
 } from 'src/dto';
 import { ApplicationService } from './application.service';
 import { ValidationPipe } from '../validator/validation.pipe';
@@ -44,6 +33,16 @@ export class ApplicationController {
     private readonly appService: ApplicationService,
   ) {}
 
+  @ApiOperation({ summary: 'Create a user' })
+  @ApiResponse({
+    status: 201,
+    description:
+      'response: {success: "User created. Wallet Address: 0x000000000000000000000000"}, {status, message, name}',
+  })
+  @Post('register-user')
+  async registerUser(@Body(new ValidationPipe()) authDTO: AuthDTO) {
+    return this.appService.registerUser(authDTO);
+  }
   @ApiOperation({ summary: "Get a user's details" })
   @ApiResponse({
     status: 200,
@@ -53,17 +52,6 @@ export class ApplicationController {
   @Get('user')
   async getUser(@Query(new ValidationPipe()) walletAddr: UserDTO) {
     return this.appService.getUser(walletAddr);
-  }
-
-  @ApiOperation({ summary: "Get a user's Loans" })
-  @ApiResponse({
-    status: 200,
-    description:
-      'id, loanId, loan_name, loan_pool_address, borrower_walletAddress, loan_amount, loan_status, tenor, collateral_offered, grace_period, createdAt, {status, message, name}',
-  })
-  @Get('all-user-loans')
-  async getAllUserLoans(@Query(new ValidationPipe()) walletAddr: UserDTO) {
-    return this.appService.getAllUserLoans(walletAddr);
   }
 
   @ApiOperation({ summary: "Get all users' details" })
@@ -77,55 +65,7 @@ export class ApplicationController {
     return this.appService.getAllUsers();
   }
 
-  @ApiOperation({ summary: "Get borrower's files" })
-  @ApiProperty({
-    example: '0x0000000000000',
-    description: "borrower's wallet addresses",
-  })
-  @ApiResponse({
-    status: 200,
-    description: "returns borrower's files' urls",
-  })
-  @Get('retrieve-files')
-  async retrieveUserFiles(@Query(new ValidationPipe()) dto: UserDTO) {
-    return this.appService.retrieveUserFiles(dto);
-  }
-
-  @ApiOperation({ summary: "Get all borrowers' files" })
-  @ApiResponse({
-    status: 200,
-    description: "returns borrower's files' urls",
-  })
-  @Get('retrieve-all-files')
-  async retrieveAllUsersFiles() {
-    return this.appService.fetchProjects();
-  }
-
-  @ApiOperation({ summary: 'Create a user' })
-  @ApiResponse({
-    status: 201,
-    description:
-      'response: {success: "User created. Wallet Address: 0x000000000000000000000000"}, {status, message, name}',
-  })
-  @Post('register-user')
-  async registerUser(@Body(new ValidationPipe()) authDTO: AuthDTO) {
-    return this.appService.registerUser(authDTO);
-  }
-
-  @ApiOperation({ summary: 'Store borrower files CID' })
-  @ApiProperty({
-    example: 'bk2b12-2lne2323-1l2kn',
-    description: 'CID returned from web3.storage after documents upload',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'CID stored',
-  })
-  @Post('upload-cid')
-  async uploadCid(@Body(new ValidationPipe()) dto: UploadCidDTO) {
-    return this.appService.uploadCid(dto);
-  }
-
+  // COMMENTED OUT FOR NOW
   // @ApiOperation({ summary: 'Upload borrower files' })
   // @ApiProperty({
   //   examples: ['file1', 'file2', 'file3'],
@@ -290,6 +230,26 @@ export class ApplicationController {
     return this.appService.createLoanRequest(walletAddr, loanRequestDTO);
   }
 
+  @ApiOperation({ summary: "Get a user's Loans" })
+  @ApiResponse({
+    status: 200,
+    description:
+      'id, loanId, loan_name, loan_pool_address, borrower_walletAddress, loan_amount, loan_status, tenor, collateral_offered, grace_period, createdAt, {status, message, name}',
+  })
+  @Get('all-user-loans')
+  async getAllUserLoans(@Query(new ValidationPipe()) walletAddr: UserDTO) {
+    return this.appService.getAllUserLoans(walletAddr);
+  }
+
+  @ApiOperation({ summary: 'Get all existing loans' })
+  @ApiResponse({
+    status: 200,
+    description: "All loans with same description as a user's loan",
+  })
+  @Get('all-loans')
+  async getAllLoans() {
+    return this.appService.getAllLoans();
+  }
   @ApiOperation({ summary: "Update a Loan's status" })
   @ApiResponse({
     status: 202,
@@ -311,5 +271,75 @@ export class ApplicationController {
   @Patch('update-loan-status')
   async updateLoanStatus(@Body(new ValidationPipe()) dto: LoanUpdateDTO) {
     return this.appService.updateLoanStatus(dto);
+  }
+
+  @ApiOperation({ summary: "Get borrower's files" })
+  @ApiProperty({
+    example: '0x0000000000000',
+    description: "borrower's wallet addresses",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "returns borrower's files' urls",
+  })
+  @Get('retrieve-files-url')
+  async getProjectUrl(@Query(new ValidationPipe()) dto: UserDTO) {
+    return this.appService.getProjectUrl(dto);
+  }
+
+  @ApiOperation({ summary: "Upload borrower's files url" })
+  @ApiProperty({
+    example: 'https://url.com',
+    description: 'url to google drive folder containing borrower docs',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'url stored',
+  })
+  @Patch('upload-files-url')
+  async uploadProjectUrl(@Query(new ValidationPipe()) dto: UploadUrlDTO) {
+    return this.appService.uploadProjectUrl(dto);
+  }
+
+  //<----------------------------------------  EXCLUDED ENDPOINTS  --------------------------------------------------->//
+  @ApiExcludeEndpoint()
+  @ApiOperation({ summary: "Get borrower's files" })
+  @ApiProperty({
+    example: '0x0000000000000',
+    description: "borrower's wallet addresses",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "returns borrower's files' urls",
+  })
+  @Get('retrieve-files')
+  async retrieveUserFiles(@Query(new ValidationPipe()) dto: UserDTO) {
+    return this.appService.retrieveUserFiles(dto);
+  }
+
+  @ApiExcludeEndpoint()
+  @ApiOperation({ summary: "Get all borrowers' files" })
+  @ApiResponse({
+    status: 200,
+    description: "returns borrower's files' urls",
+  })
+  @Get('retrieve-all-files')
+  async retrieveAllUsersFiles() {
+    return this.appService.fetchProjects();
+  }
+
+  @ApiExcludeEndpoint()
+  @ApiOperation({ summary: 'Store borrower files CID' })
+  @ApiProperty({
+    example: 'bk2b12-2lne2323-1l2kn',
+    description: 'CID returned from web3.storage after documents upload',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CID stored',
+  })
+  @Post('upload-cid')
+  async uploadCid(@Body(new ValidationPipe()) dto: UploadCidDTO) {
+    return this.appService.uploadCid(dto);
   }
 }
