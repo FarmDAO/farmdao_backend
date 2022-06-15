@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import {
   IsEmail,
-  IsEthereumAddress,
   IsIn,
   IsInt,
   IsNotEmpty,
@@ -34,7 +33,6 @@ export class AuthDTO {
   })
   @IsNotEmpty()
   @IsString()
-  @IsEthereumAddress()
   walletAddress: string;
 
   @ApiProperty({
@@ -53,7 +51,6 @@ export class UserDTO {
   })
   @IsNotEmpty()
   @IsString()
-  @IsEthereumAddress()
   walletAddress: string;
 }
 
@@ -149,7 +146,6 @@ export class UploadCidDTO {
   })
   @IsNotEmpty()
   @IsString()
-  @IsEthereumAddress()
   walletAddress: string;
 }
 
@@ -169,6 +165,5 @@ export class UploadUrlDTO {
   })
   @IsNotEmpty()
   @IsString()
-  @IsEthereumAddress()
   walletAddress: string;
 }
