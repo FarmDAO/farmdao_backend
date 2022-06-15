@@ -294,7 +294,7 @@ export class ApplicationService {
 
   // ---------------------------------------------Pure functions---------------------------------------------------
   async generateHash(walletAddr: string): Promise<any> {
-    const hash = ethers.utils.keccak256(walletAddr);
+    const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(walletAddr));
 
     return hash;
   }
