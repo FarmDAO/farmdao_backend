@@ -252,7 +252,9 @@ export class ApplicationService {
     });
 
     const hashCheck =
-      ethers.utils.keccak256(borrower_walletAddress) == user.hash;
+      ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(borrower_walletAddress),
+      ) == user.hash;
 
     if (!user) return new ProjectNotFoundException(borrower_walletAddress);
     const loanId = uuidv4();
